@@ -46,9 +46,7 @@ class MainController: UITabBarController {
         tabBar.layer.addSublayer(topBorder)
         tabBar.clipsToBounds = true
         tabBar.tintColor = Pallete.palette_main
-        
-        monitorLocation()
-        
+                
     }
     
     

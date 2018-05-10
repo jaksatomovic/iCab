@@ -7,14 +7,20 @@
 //
 
 import UIKit
-import GoogleMaps
-import GooglePlaces
 import Alamofire
 import CodableAlamofire
+import CoreLocation
+import MapKit
 
-class HomeController: UIViewController, GMSMapViewDelegate {
+class HomeController: UIViewController {
     
+    private var booking: Booking?
     
+    private let locationManager = LocationManager.shared
+    private var seconds = 0
+    private var timer: Timer?
+    private var distance = Measurement(value: 0, unit: UnitLength.meters)
+    private var locationList: [CLLocation] = []
     
     var fromTextField: UITextField = {
         let tf = UITextField()
@@ -49,36 +55,61 @@ class HomeController: UIViewController, GMSMapViewDelegate {
         return tf
     }()
     
-    var mainButton: UIButton = {
+    var startButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .green
         btn.clipsToBounds = true
         btn.layer.cornerRadius = 10
         btn.setTitleColor(UIColor.white, for: .normal)
         btn.setTitle("Start ride", for: .normal)
-        btn.tag = 0
+        btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        return btn
+    }()
+    
+    var pauseButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = .darkGray
+        btn.clipsToBounds = true
+        btn.layer.cornerRadius = 10
+        btn.setTitleColor(UIColor.white, for: .normal)
+        btn.setTitle("Pause ride", for: .normal)
+//        btn.addTarget(self, action: #selector(stopTapped), for: .touchUpInside)
+        return btn
+    }()
+    
+    var stopButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = .red
+        btn.clipsToBounds = true
+        btn.layer.cornerRadius = 10
+        btn.setTitleColor(UIColor.white, for: .normal)
+        btn.setTitle("Stop ride", for: .normal)
+        btn.addTarget(self, action: #selector(stopTapped), for: .touchUpInside)
         return btn
     }()
 
     
-    lazy var mapView: GMSMapView = {
-        let view = GMSMapView()
-        view.delegate = self
+    var mapView: MKMapView = {
+        let view = MKMapView()
         return view
     }()
     
     
-    fileprivate var locationMarker : GMSMarker? = GMSMarker()
-    
-    let lat = 42.95289
-    let long = 17.149889
-    let zoom: Float = 13
-    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        timer?.invalidate()
+        locationManager.stopUpdatingLocation()
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
-        createMapView()
+        mapView.delegate = self
+    }
+    
+    
+    func eachSecond() {
+        seconds += 1
     }
     
     func setupViews() {
@@ -86,7 +117,10 @@ class HomeController: UIViewController, GMSMapViewDelegate {
         view.addSubview(fromTextField)
         view.addSubview(toTextField)
         view.addSubview(seatNumberTextField)
-        view.addSubview(mainButton)
+        view.addSubview(startButton)
+        view.addSubview(stopButton)
+        view.addSubview(pauseButton)
+
 
         mapView.fillSuperview()
         
@@ -96,74 +130,126 @@ class HomeController: UIViewController, GMSMapViewDelegate {
         
         seatNumberTextField.anchor(fromTextField.bottomAnchor, left: toTextField.rightAnchor, bottom: nil, right: view.rightAnchor, topConstant: 5, leftConstant: 5, bottomConstant: 0, rightConstant: 32, widthConstant: 50, heightConstant: 50)
         
-        mainButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: nil, topConstant: 0, leftConstant: -60, bottomConstant: 8, rightConstant: 0, widthConstant: 120, heightConstant: 45)
         
-        mapView.settings.myLocationButton = true
+        startButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 24, bottomConstant: 8, rightConstant: 24, widthConstant: 0, heightConstant: 45)
+        stopButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.centerXAnchor, topConstant: 0, leftConstant: 24, bottomConstant: 8, rightConstant: 6, widthConstant: 0, heightConstant: 45)
+        pauseButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 6, bottomConstant: 8, rightConstant: 24, widthConstant: 0, heightConstant: 45)
         
+        startButton.isHidden = false
+        stopButton.isHidden = true
+        pauseButton.isHidden = true
         
-        
-//        self.mapView.mapStyle(withFilename: "paper", andType: "json")
     }
     
-    func createMapView() {
-        let camera = GMSCameraPosition.camera(withLatitude:lat, longitude: long, zoom: zoom)
-        mapView.camera = camera
-        mapView.isMyLocationEnabled = true
+    private func startLocationUpdates() {
+        locationManager.delegate = self
+        locationManager.activityType = .automotiveNavigation
+        locationManager.distanceFilter = 10
+        locationManager.startUpdatingLocation()
     }
     
+    private func startRun() {
+        startButton.isHidden = true
+        stopButton.isHidden = false
+        pauseButton.isHidden = false
+        mapView.removeOverlays(mapView.overlays)
+        
+        seconds = 0
+        distance = Measurement(value: 0, unit: UnitLength.meters)
+        locationList.removeAll()
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            self.eachSecond()
+        }
+        startLocationUpdates()
+    }
+    
+    private func stopRun() {
+        startButton.isHidden = false
+        stopButton.isHidden = true
+        
+        locationManager.stopUpdatingLocation()
+    }
+  
+    private func saveRun() {
+        let newBooking = Booking(context: CoreDataManager.context)
+        newBooking.distance = distance.value
+        newBooking.duration = Int16(seconds)
+        newBooking.time = Date()
+        
+        for location in locationList {
+            let locationObject = Location(context: CoreDataManager.context)
+            locationObject.timestamp = location.timestamp
+            locationObject.latitude = location.coordinate.latitude
+            locationObject.longitude = location.coordinate.longitude
+            newBooking.addToLocations(locationObject)
+        }
+        
+        CoreDataManager.saveContext()
+        
+        booking = newBooking
+    }
+    
+}
 
+extension HomeController {
     
-    private func setMapCamera() {
-        CATransaction.begin()
-        CATransaction.setValue(2, forKey: kCATransactionAnimationDuration)
-        mapView.animate(to: GMSCameraPosition.camera(withLatitude: 42.954282, longitude: 17.130729, zoom: 15))
-        CATransaction.commit()
+    @objc func startTapped() {
+        startRun()
     }
     
-   
-    
-    //MARK: GMSMapViewDelegate Methods
-//    func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
-//
-//        locationMarker = marker
-//        infoWindow.removeFromSuperview()
-//        infoWindow = loadNiB()
-//        guard let location = locationMarker?.position else {
-//            print("locationMarker is nil")
-//            return false
-//        }
-//        //        infoWindow.spotData = markerData
-//        infoWindow.delegate = self
-//        infoWindow.alpha = 0.9
-//        infoWindow.layer.cornerRadius = 12
-//        infoWindow.layer.borderWidth = 2
-//        infoWindow.layer.borderColor = Pallete.palette_blue.cgColor
-//        infoWindow.infoButton.layer.cornerRadius = infoWindow.infoButton.frame.height / 2
-//
-//
-//        infoWindow.titleLabel.text = "Tomovic Holiday Apartments"
-//        infoWindow.priceRange.rating = 3
-//        infoWindow.center = mapView.projection.point(for: location)
-//        infoWindow.center.y = infoWindow.center.y - 82
-//        self.view.addSubview(infoWindow)
-//        return false
-//    }
-    
-//    func mapView(_ mapView: GMSMapView, didChange position: GMSCameraPosition) {
-//        if (locationMarker != nil){
-//            guard let location = locationMarker?.position else {
-//                print("locationMarker is nil")
-//                return
-//            }
-//            infoWindow.center = mapView.projection.point(for: location)
-//            infoWindow.center.y = infoWindow.center.y - 82
-//        }
-//    }
-    
-//    func mapView(_ mapView: GMSMapView, didTapAt coordinate: CLLocationCoordinate2D) {
-//        infoWindow.removeFromSuperview()
-//    }
+    @objc func stopTapped() {
+        let alertController = UIAlertController(title: "End run?",
+                                                message: "Do you wish to end your run?",
+                                                preferredStyle: .actionSheet)
+        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        alertController.addAction(UIAlertAction(title: "Save", style: .default) { _ in
+            self.stopRun()
+            self.saveRun()
+            self.show(DetailController(), sender: self)
+        })
+        alertController.addAction(UIAlertAction(title: "Discard", style: .destructive) { _ in
+            self.stopRun()
+            _ = self.navigationController?.popToRootViewController(animated: true)
+        })
+        
+        present(alertController, animated: true)
+    }
+}
 
+// MARK: - Location Manager Delegate
+
+extension HomeController: CLLocationManagerDelegate {
     
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        for newLocation in locations {
+            let howRecent = newLocation.timestamp.timeIntervalSinceNow
+            guard newLocation.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
+            
+            if let lastLocation = locationList.last {
+                let delta = newLocation.distance(from: lastLocation)
+                distance = distance + Measurement(value: delta, unit: UnitLength.meters)
+                let coordinates = [lastLocation.coordinate, newLocation.coordinate]
+                mapView.add(MKPolyline(coordinates: coordinates, count: 2))
+                let region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 500, 500)
+                mapView.setRegion(region, animated: true)
+            }
+            
+            locationList.append(newLocation)
+        }
+    }
+}
+
+// MARK: - Map View Delegate
+
+extension HomeController: MKMapViewDelegate {
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        guard let polyline = overlay as? MKPolyline else {
+            return MKOverlayRenderer(overlay: overlay)
+        }
+        let renderer = MKPolylineRenderer(polyline: polyline)
+        renderer.strokeColor = .blue
+        renderer.lineWidth = 3
+        return renderer
+    }
 }
 

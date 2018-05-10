@@ -3,14 +3,13 @@
 
 target 'iCab' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+  inhibit_all_warnings!
   use_frameworks!
 
   # Pods for iCab
 
     pod 'Alamofire'
     pod 'CodableAlamofire'
-    pod 'GoogleMaps'
-    pod 'GooglePlaces'
     pod 'SwipeTransition'
 	
 
