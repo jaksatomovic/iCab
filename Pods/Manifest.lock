@@ -1,19 +1,22 @@
 PODS:
+  - AHKActionSheet (0.5.4)
   - Alamofire (4.6.0)
   - CodableAlamofire (1.1.0):
     - Alamofire (~> 4.0)
   - SwipeTransition (0.1.4)
 
 DEPENDENCIES:
+  - AHKActionSheet
   - Alamofire
   - CodableAlamofire
   - SwipeTransition
 
 SPEC CHECKSUMS:
+  AHKActionSheet: f0b312b5c689f72924d231c39dae140ecd5c1d46
   Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
   CodableAlamofire: e2d2edcec7cf413f7862c30c8fa98eded27a83f9
   SwipeTransition: c5542be9fa21ba3b04ce16d7b3e732a99d2e46da
 
-PODFILE CHECKSUM: db6e415adb21b01ec496b037cc3c8c487a0f77f8
+PODFILE CHECKSUM: d35583908b735b3333af5ec29d8abd89e08112f1
 
 COCOAPODS: 1.4.0

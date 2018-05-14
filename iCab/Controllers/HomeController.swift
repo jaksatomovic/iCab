@@ -12,6 +12,7 @@ import CodableAlamofire
 import CoreLocation
 import MapKit
 
+
 class HomeController: UIViewController {
     
     private var booking: Booking?
@@ -29,7 +30,8 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.placeholder = "  From: "
+        tf.text = "   From: Heinzelova 62A"
+        tf.textAlignment = .left
         return tf
     }()
     
@@ -40,7 +42,8 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.placeholder = "  To: "
+        tf.text = "   To: Maksimirska 23"
+        tf.textAlignment = .left
         return tf
     }()
     
@@ -51,17 +54,25 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.placeholder = "  4 "
+        tf.text = "4"
+        tf.textAlignment = .center
         return tf
     }()
     
     var startButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .green
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 10
         btn.setTitleColor(UIColor.white, for: .normal)
         btn.setTitle("Start ride", for: .normal)
+        btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        return btn
+    }()
+    
+    var pickedButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = .black
+        btn.setTitleColor(UIColor.white, for: .normal)
+        btn.setTitle("Passenger picked up", for: .normal)
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
         return btn
     }()
@@ -105,6 +116,8 @@ class HomeController: UIViewController {
         super.viewDidLoad()
         setupViews()
         mapView.delegate = self
+        mapView.showsUserLocation = true
+//        startLocationUpdates()
     }
     
     
@@ -120,7 +133,7 @@ class HomeController: UIViewController {
         view.addSubview(startButton)
         view.addSubview(stopButton)
         view.addSubview(pauseButton)
-
+        view.addSubview(pickedButton)
 
         mapView.fillSuperview()
         
@@ -131,12 +144,14 @@ class HomeController: UIViewController {
         seatNumberTextField.anchor(fromTextField.bottomAnchor, left: toTextField.rightAnchor, bottom: nil, right: view.rightAnchor, topConstant: 5, leftConstant: 5, bottomConstant: 0, rightConstant: 32, widthConstant: 50, heightConstant: 50)
         
         
-        startButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 24, bottomConstant: 8, rightConstant: 24, widthConstant: 0, heightConstant: 45)
+        startButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
+        pickedButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
         stopButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.centerXAnchor, topConstant: 0, leftConstant: 24, bottomConstant: 8, rightConstant: 6, widthConstant: 0, heightConstant: 45)
         pauseButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 6, bottomConstant: 8, rightConstant: 24, widthConstant: 0, heightConstant: 45)
         
         startButton.isHidden = false
         stopButton.isHidden = true
+        pickedButton.isHidden = true
         pauseButton.isHidden = true
         
     }
@@ -146,12 +161,12 @@ class HomeController: UIViewController {
         locationManager.activityType = .automotiveNavigation
         locationManager.distanceFilter = 10
         locationManager.startUpdatingLocation()
+        locationManager.startUpdatingHeading()
     }
     
     private func startRun() {
         startButton.isHidden = true
-        stopButton.isHidden = false
-        pauseButton.isHidden = false
+        pickedButton.isHidden = false
         mapView.removeOverlays(mapView.overlays)
         
         seconds = 0
@@ -166,7 +181,8 @@ class HomeController: UIViewController {
     private func stopRun() {
         startButton.isHidden = false
         stopButton.isHidden = true
-        
+        pauseButton.isHidden = true
+
         locationManager.stopUpdatingLocation()
     }
   
@@ -175,6 +191,7 @@ class HomeController: UIViewController {
         newBooking.distance = distance.value
         newBooking.duration = Int16(seconds)
         newBooking.time = Date()
+        newBooking.status = "waitingPickUp"
         
         for location in locationList {
             let locationObject = Location(context: CoreDataManager.context)
@@ -205,7 +222,9 @@ extension HomeController {
         alertController.addAction(UIAlertAction(title: "Save", style: .default) { _ in
             self.stopRun()
             self.saveRun()
-            self.show(DetailController(), sender: self)
+            let vc = DetailController()
+            vc.booking = self.booking
+            self.show(vc, sender: self)
         })
         alertController.addAction(UIAlertAction(title: "Discard", style: .destructive) { _ in
             self.stopRun()
@@ -251,5 +270,17 @@ extension HomeController: MKMapViewDelegate {
         renderer.lineWidth = 3
         return renderer
     }
+    
+//    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+//        if annotation is MKUserLocation {
+//            let pin = mapView.view(for: annotation) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
+//            pin.image = UIImage(named: "map_car_running")
+//            return pin
+//        } else {
+//            // handle other annotations
+//            
+//        }
+//        return nil
+//    }
 }
 

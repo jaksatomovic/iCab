@@ -11,6 +11,6 @@ target 'iCab' do
     pod 'Alamofire'
     pod 'CodableAlamofire'
     pod 'SwipeTransition'
-	
+    pod 'AHKActionSheet'
 
 end
