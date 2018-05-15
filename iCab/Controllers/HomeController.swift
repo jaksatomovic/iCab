@@ -38,7 +38,6 @@ class HomeController: UIViewController {
         tf.textAlignment = .left
         tf.textColor = .black
         tf.placeholder = "From:"
-//        tf.text = "Heinzelova 62A"
         tf.textAlignment = .left
         tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
@@ -52,7 +51,6 @@ class HomeController: UIViewController {
         tf.textAlignment = .left
         tf.textColor = .black
         tf.placeholder = "To:"
-//        tf.text = "Maksimirska 23"
         tf.textAlignment = .left
         tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
@@ -65,7 +63,6 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-//        tf.text = "1"
         tf.placeholder = "4"
         tf.textAlignment = .center
         tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
@@ -227,7 +224,9 @@ class HomeController: UIViewController {
         newBooking.distance = distance.value
         newBooking.duration = Int16(seconds)
         newBooking.time = Date()
-        newBooking.status = ""
+        newBooking.status = "started"
+        newBooking.start = fromTextField.text
+        newBooking.finish = toTextField.text
         
         for location in locationList {
             let locationObject = Location(context: CoreDataManager.context)
@@ -289,6 +288,23 @@ class HomeController: UIViewController {
         return 0
     }
     
+    func addMarkerToMap(_ address: String) {
+        let annotation = MKPointAnnotation()
+        let geoCoder = CLGeocoder()
+        geoCoder.geocodeAddressString(address) { (placemarks, error) in
+            guard
+                let placemarks = placemarks,
+                let location = placemarks.first?.location
+                
+                else {
+                    print("nothing found...")
+                    return
+            }
+            annotation.coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+            self.mapView.addAnnotation(annotation)
+        }
+    }
+    
 }
 
 // MARK: - Actions
@@ -323,12 +339,14 @@ extension HomeController {
 
     
     @objc func stopTapped() {
+        
         let alertController = UIAlertController(title: "End ride?",
                                                 message: "Do you wish to end your ride?",
                                                 preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alertController.addAction(UIAlertAction(title: "Yes", style: .default) { _ in
             self.stopRide()
+            self.changeStatus("finished")
             self.saveRide()
             let vc = DetailController()
             vc.booking = self.booking
@@ -339,9 +357,6 @@ extension HomeController {
     }
     
     @objc func textFieldDidChange(_ textField: UITextField) {
-        
-        let annotation = MKPointAnnotation()
-        
 
         if (textField == fromTextField) {
             _from = textField.text!
@@ -354,23 +369,11 @@ extension HomeController {
         }
         if (_seats != "" && _to != "" && _from != "") {
             startButton.isHidden = false
-            let address = _to
-            let geoCoder = CLGeocoder()
-            geoCoder.geocodeAddressString(address) { (placemarks, error) in
-                guard
-                    let placemarks = placemarks,
-                    let location = placemarks.first?.location
-                    
-                else {
-                        print("nothing found...")
-                        return
-                }
-                annotation.coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-                self.mapView.addAnnotation(annotation)
-                // Use your location
-            }
+            addMarkerToMap(_to)
+            addMarkerToMap(_from)
         }
     }
+    
 }
 
 // MARK: - Location Manager Delegate

@@ -40,12 +40,11 @@ class PreviousController: UIViewController {
         
         do {
             let bookings = try context.fetch(fetchRequest)
-            
-//            bookings.forEach({ (booking) in
-//                print(booking.time ?? "")
-//            })
-            
-            self.bookings = bookings
+            for book in bookings {
+                if book.status == "started" {
+                    self.bookings.append(book)
+                }
+            }
             self.tableView.reloadData()
             
         } catch let fetchErr {
@@ -67,7 +66,7 @@ extension PreviousController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
-        cell.textLabel?.text = "\(bookings[indexPath.row].time as Any)"
+        cell.textLabel?.text = "\(bookings[indexPath.row].start ?? "") - \(bookings[indexPath.row].finish ?? "") "
         return cell
     }
     
