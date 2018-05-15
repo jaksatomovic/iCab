@@ -12,6 +12,7 @@
 		6014539220A9BD9C0094924F /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6014539120A9BD9C0094924F /* Constants.swift */; };
 		6014539420A9BEA40094924F /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6014539320A9BEA40094924F /* Extensions.swift */; };
 		6014539620A9C5910094924F /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6014539520A9C5910094924F /* Globals.swift */; };
+		602FEC4C20AADED800AB7EF9 /* Booking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 602FEC4B20AADED800AB7EF9 /* Booking.swift */; };
 		60423C9620A4D1B2005111C4 /* CoreDataModels.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 60423C9420A4D1B2005111C4 /* CoreDataModels.xcdatamodeld */; };
 		60423C9920A4D441005111C4 /* DetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60423C9820A4D441005111C4 /* DetailController.swift */; };
 		60423C9B20A4D542005111C4 /* UnitExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60423C9A20A4D542005111C4 /* UnitExtensions.swift */; };
@@ -37,6 +38,7 @@
 		6014539120A9BD9C0094924F /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		6014539320A9BEA40094924F /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		6014539520A9C5910094924F /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
+		602FEC4B20AADED800AB7EF9 /* Booking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Booking.swift; sourceTree = "<group>"; };
 		60423C9520A4D1B2005111C4 /* CoreDataModels.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataModels.xcdatamodel; sourceTree = "<group>"; };
 		60423C9820A4D441005111C4 /* DetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailController.swift; sourceTree = "<group>"; };
 		60423C9A20A4D542005111C4 /* UnitExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitExtensions.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 			children = (
 				60423C9420A4D1B2005111C4 /* CoreDataModels.xcdatamodeld */,
 				60E93C0920A4E0A500908B35 /* CoreDataManager.swift */,
+				602FEC4B20AADED800AB7EF9 /* Booking.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 				6014539620A9C5910094924F /* Globals.swift in Sources */,
 				608E5A2520A45426007C3E9C /* Colors.swift in Sources */,
 				608E5A2320A45410007C3E9C /* UIView+Anchors.swift in Sources */,
+				602FEC4C20AADED800AB7EF9 /* Booking.swift in Sources */,
 				608E5A1520A45181007C3E9C /* SettingsController.swift in Sources */,
 				60423C9920A4D441005111C4 /* DetailController.swift in Sources */,
 				608E5A1720A45191007C3E9C /* HomeController.swift in Sources */,

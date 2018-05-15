@@ -11,6 +11,7 @@ import Alamofire
 import CodableAlamofire
 import CoreLocation
 import MapKit
+import CoreData
 
 
 class HomeController: UIViewController {
@@ -22,6 +23,7 @@ class HomeController: UIViewController {
     private var timer: Timer?
     private var distance = Measurement(value: 0, unit: UnitLength.meters)
     private var locationList: [CLLocation] = []
+    private var currentObjectId: Any?
     
     var fromTextField: UITextField = {
         let tf = UITextField()
@@ -73,26 +75,31 @@ class HomeController: UIViewController {
         btn.backgroundColor = .black
         btn.setTitleColor(UIColor.white, for: .normal)
         btn.setTitle("Passenger picked up", for: .normal)
-        btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
+        btn.addTarget(self, action: #selector(pickedUpTapped), for: .touchUpInside)
+        return btn
+    }()
+    
+    var continueButton: UIButton = {
+        let btn = UIButton()
+        btn.backgroundColor = .black
+        btn.setTitleColor(UIColor.white, for: .normal)
+        btn.setTitle("Continue ride", for: .normal)
+        btn.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
         return btn
     }()
     
     var pauseButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .darkGray
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 10
         btn.setTitleColor(UIColor.white, for: .normal)
-        btn.setTitle("Pause ride", for: .normal)
-//        btn.addTarget(self, action: #selector(stopTapped), for: .touchUpInside)
+        btn.setTitle("Stop-over", for: .normal)
+        btn.addTarget(self, action: #selector(pauseTapped), for: .touchUpInside)
         return btn
     }()
     
     var stopButton: UIButton = {
         let btn = UIButton()
         btn.backgroundColor = .red
-        btn.clipsToBounds = true
-        btn.layer.cornerRadius = 10
         btn.setTitleColor(UIColor.white, for: .normal)
         btn.setTitle("Stop ride", for: .normal)
         btn.addTarget(self, action: #selector(stopTapped), for: .touchUpInside)
@@ -117,13 +124,9 @@ class HomeController: UIViewController {
         setupViews()
         mapView.delegate = self
         mapView.showsUserLocation = true
-//        startLocationUpdates()
+        startLocationUpdates()
     }
     
-    
-    func eachSecond() {
-        seconds += 1
-    }
     
     func setupViews() {
         view.addSubview(mapView)
@@ -134,6 +137,7 @@ class HomeController: UIViewController {
         view.addSubview(stopButton)
         view.addSubview(pauseButton)
         view.addSubview(pickedButton)
+        view.addSubview(continueButton)
 
         mapView.fillSuperview()
         
@@ -146,14 +150,20 @@ class HomeController: UIViewController {
         
         startButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
         pickedButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
-        stopButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.centerXAnchor, topConstant: 0, leftConstant: 24, bottomConstant: 8, rightConstant: 6, widthConstant: 0, heightConstant: 45)
-        pauseButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 6, bottomConstant: 8, rightConstant: 24, widthConstant: 0, heightConstant: 45)
+        stopButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.centerXAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
+        continueButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
+        pauseButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
         
         startButton.isHidden = false
         stopButton.isHidden = true
         pickedButton.isHidden = true
         pauseButton.isHidden = true
-        
+        continueButton.isHidden = true
+
+    }
+    
+    func eachSecond() {
+        seconds += 1
     }
     
     private func startLocationUpdates() {
@@ -162,9 +172,11 @@ class HomeController: UIViewController {
         locationManager.distanceFilter = 10
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
+        saveRide()
     }
     
-    private func startRun() {
+    private func startRide() {
+        
         startButton.isHidden = true
         pickedButton.isHidden = false
         mapView.removeOverlays(mapView.overlays)
@@ -175,10 +187,10 @@ class HomeController: UIViewController {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             self.eachSecond()
         }
-        startLocationUpdates()
+        saveRide()
     }
     
-    private func stopRun() {
+    private func stopRide() {
         startButton.isHidden = false
         stopButton.isHidden = true
         pauseButton.isHidden = true
@@ -186,12 +198,15 @@ class HomeController: UIViewController {
         locationManager.stopUpdatingLocation()
     }
   
-    private func saveRun() {
+    private func saveRide() {
+
+        var parameters : NSDictionary!
+        
         let newBooking = Booking(context: CoreDataManager.context)
         newBooking.distance = distance.value
         newBooking.duration = Int16(seconds)
         newBooking.time = Date()
-        newBooking.status = "waitingPickUp"
+        newBooking.status = ""
         
         for location in locationList {
             let locationObject = Location(context: CoreDataManager.context)
@@ -204,31 +219,99 @@ class HomeController: UIViewController {
         CoreDataManager.saveContext()
         
         booking = newBooking
+        currentObjectId = booking?.objectID
+        parameters = [
+            "bookingId" : "\(getAutoIncremenet(currentObjectId as! NSManagedObjectID))",
+            "status" : "started",
+            "time" : "\(booking?.time as Any)",
+            "lat" : "",
+            "lng" : ""
+        ]
+        
+        sendBookingData(parameters)
+    }
+    
+    private func changeStatus(_ message: String) {
+        var parameters : NSDictionary!
+        var object: Booking!
+        let context = CoreDataManager.context
+
+        do {
+            object = try context.existingObject(with: currentObjectId as! NSManagedObjectID) as! Booking
+            object.status = message
+        } catch {
+            print("Can't find object...")
+        }
+        
+        CoreDataManager.saveContext()
+                
+        parameters = [
+            "bookingId" : "\(getAutoIncremenet(currentObjectId as! NSManagedObjectID))",
+            "status" : "\(object.status as Any)",
+            "time" : "\(object?.time as Any)",
+            "lat" : "",
+            "lng" : ""
+        ]
+        
+        sendBookingData(parameters)
+    }
+    
+    func getAutoIncremenet(_ objectID: NSManagedObjectID) -> Int64   {
+        let url = objectID.uriRepresentation()
+        let urlString = url.absoluteString
+        if let pN = urlString.components(separatedBy: "/").last {
+            let numberPart = pN.replacingOccurrences(of: "p", with: "")
+            if let number = Int64(numberPart) {
+                return number
+            }
+        }
+        return 0
     }
     
 }
 
+// MARK: - Actions
+
 extension HomeController {
     
     @objc func startTapped() {
-        startRun()
+        startRide()
     }
     
+    @objc func pauseTapped() {
+        continueButton.isHidden = false
+        pickedButton.isHidden = true
+        stopButton.isHidden = true
+        pauseButton.isHidden = true
+        changeStatus("paused")
+    }
+    
+    @objc func continueTapped() {
+        continueButton.isHidden = true
+        stopButton.isHidden = false
+        pauseButton.isHidden = false
+        changeStatus("continued")
+    }
+    
+    @objc func pickedUpTapped() {
+        pickedButton.isHidden = true
+        stopButton.isHidden = false
+        pauseButton.isHidden = false
+        changeStatus("pickedUp")
+    }
+
+    
     @objc func stopTapped() {
-        let alertController = UIAlertController(title: "End run?",
-                                                message: "Do you wish to end your run?",
+        let alertController = UIAlertController(title: "End ride?",
+                                                message: "Do you wish to end your ride?",
                                                 preferredStyle: .actionSheet)
         alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alertController.addAction(UIAlertAction(title: "Save", style: .default) { _ in
-            self.stopRun()
-            self.saveRun()
+        alertController.addAction(UIAlertAction(title: "Yes", style: .default) { _ in
+            self.stopRide()
+            self.saveRide()
             let vc = DetailController()
             vc.booking = self.booking
             self.show(vc, sender: self)
-        })
-        alertController.addAction(UIAlertAction(title: "Discard", style: .destructive) { _ in
-            self.stopRun()
-            _ = self.navigationController?.popToRootViewController(animated: true)
         })
         
         present(alertController, animated: true)
@@ -270,17 +353,29 @@ extension HomeController: MKMapViewDelegate {
         renderer.lineWidth = 3
         return renderer
     }
+}
+
+// MARK: - API
+
+extension HomeController {
     
-//    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-//        if annotation is MKUserLocation {
-//            let pin = mapView.view(for: annotation) ?? MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
-//            pin.image = UIImage(named: "map_car_running")
-//            return pin
-//        } else {
-//            // handle other annotations
-//            
-//        }
-//        return nil
-//    }
+    func sendBookingData(_ parameters : NSDictionary) {
+        
+        let url : String = "https://test.mother.i-ways.hr?json=1"
+        print(parameters)
+        Alamofire.request(url, method: .post, parameters: parameters as? [String : AnyObject], encoding: JSONEncoding.default).responseString { response in
+            print(response)
+            switch response.result {
+            case .success(let value):
+                if let httpStatusCode = response.response?.statusCode {
+                    if httpStatusCode == 200 {
+                        print("VALUE: \(value)")
+                    }
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
 }
 
