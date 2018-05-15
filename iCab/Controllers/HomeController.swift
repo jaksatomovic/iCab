@@ -325,7 +325,7 @@ extension HomeController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         for newLocation in locations {
             let howRecent = newLocation.timestamp.timeIntervalSinceNow
-            guard newLocation.horizontalAccuracy < 20 && abs(howRecent) < 10 else { continue }
+            guard newLocation.horizontalAccuracy < 15 && abs(howRecent) < 10 else { continue }
             
             if let lastLocation = locationList.last {
                 let delta = newLocation.distance(from: lastLocation)
@@ -335,7 +335,8 @@ extension HomeController: CLLocationManagerDelegate {
                 let region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 500, 500)
                 mapView.setRegion(region, animated: true)
             }
-            
+            print("NEW LOCATION: \(newLocation)")
+            sendGPSData(newLocation)
             locationList.append(newLocation)
         }
     }
@@ -362,6 +363,33 @@ extension HomeController {
     func sendBookingData(_ parameters : NSDictionary) {
         
         let url : String = "https://test.mother.i-ways.hr?json=1"
+        print(parameters)
+        Alamofire.request(url, method: .post, parameters: parameters as? [String : AnyObject], encoding: JSONEncoding.default).responseString { response in
+            print(response)
+            switch response.result {
+            case .success(let value):
+                if let httpStatusCode = response.response?.statusCode {
+                    if httpStatusCode == 200 {
+                        print("VALUE: \(value)")
+                    }
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    func sendGPSData(_ location: CLLocation) {
+        
+        let url : String = "https://test.mother.i-ways.hr?json=1"
+        var parameters : NSDictionary!
+
+        parameters = [
+            "bookingId" : "\(getAutoIncremenet(currentObjectId as! NSManagedObjectID))",
+            "time" : "\(Date())",
+            "lat" : location.coordinate.latitude,
+            "lng" : location.coordinate.longitude
+        ]
         print(parameters)
         Alamofire.request(url, method: .post, parameters: parameters as? [String : AnyObject], encoding: JSONEncoding.default).responseString { response in
             print(response)
