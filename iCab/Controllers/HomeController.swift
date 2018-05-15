@@ -25,6 +25,10 @@ class HomeController: UIViewController {
     private var locationList: [CLLocation] = []
     private var currentObjectId: Any?
     private var _isStarted: Bool = false
+    private var _from: String = ""
+    private var _to: String = ""
+    private var _seats: String = ""
+
     
     var fromTextField: UITextField = {
         let tf = UITextField()
@@ -33,8 +37,10 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.text = "   From: Heinzelova 62A"
+        tf.placeholder = "From:"
+//        tf.text = "Heinzelova 62A"
         tf.textAlignment = .left
+        tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
     }()
     
@@ -45,8 +51,10 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.text = "   To: Maksimirska 23"
+        tf.placeholder = "To:"
+//        tf.text = "Maksimirska 23"
         tf.textAlignment = .left
+        tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
     }()
     
@@ -57,8 +65,10 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.text = "4"
+//        tf.text = "1"
+        tf.placeholder = "4"
         tf.textAlignment = .center
+        tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
     }()
     
@@ -126,6 +136,9 @@ class HomeController: UIViewController {
         mapView.delegate = self
         mapView.showsUserLocation = true
         startLocationUpdates()
+        
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tap)
     }
     
     
@@ -155,12 +168,16 @@ class HomeController: UIViewController {
         continueButton.anchor(nil, left: view.leftAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
         pauseButton.anchor(nil, left: view.centerXAnchor, bottom: view.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 0, widthConstant: 0, heightConstant: 45)
         
-        startButton.isHidden = false
+        startButton.isHidden = true
         stopButton.isHidden = true
         pickedButton.isHidden = true
         pauseButton.isHidden = true
         continueButton.isHidden = true
 
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     func eachSecond() {
@@ -319,6 +336,40 @@ extension HomeController {
         })
         
         present(alertController, animated: true)
+    }
+    
+    @objc func textFieldDidChange(_ textField: UITextField) {
+        
+        let annotation = MKPointAnnotation()
+        
+
+        if (textField == fromTextField) {
+            _from = textField.text!
+        }
+        if (textField == toTextField) {
+            _to = textField.text!
+        }
+        if (textField == seatNumberTextField) {
+            _seats = textField.text!
+        }
+        if (_seats != "" && _to != "" && _from != "") {
+            startButton.isHidden = false
+            let address = _to
+            let geoCoder = CLGeocoder()
+            geoCoder.geocodeAddressString(address) { (placemarks, error) in
+                guard
+                    let placemarks = placemarks,
+                    let location = placemarks.first?.location
+                    
+                else {
+                        print("nothing found...")
+                        return
+                }
+                annotation.coordinate = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
+                self.mapView.addAnnotation(annotation)
+                // Use your location
+            }
+        }
     }
 }
 

@@ -19,7 +19,7 @@ class MainController: UITabBarController {
         view.backgroundColor = .white
         
         let mapController = HomeController()
-        mapController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal))
+        mapController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "mappointer").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "mappointer").withRenderingMode(.alwaysOriginal))
         mapController.tabBarItem.title = "Home"
         
         
@@ -31,7 +31,7 @@ class MainController: UITabBarController {
         
         let settingsController = SettingsController()
         let navSettingsController = SwipeNavigationController(rootViewController: settingsController)
-        navSettingsController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "bell").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "bell").withRenderingMode(.alwaysOriginal))
+        navSettingsController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal))
         navSettingsController.tabBarItem.title = "Settings"
         
         
