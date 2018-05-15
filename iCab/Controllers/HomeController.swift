@@ -24,6 +24,7 @@ class HomeController: UIViewController {
     private var distance = Measurement(value: 0, unit: UnitLength.meters)
     private var locationList: [CLLocation] = []
     private var currentObjectId: Any?
+    private var _isStarted: Bool = false
     
     var fromTextField: UITextField = {
         let tf = UITextField()
@@ -176,7 +177,8 @@ class HomeController: UIViewController {
     }
     
     private func startRide() {
-        
+        _isStarted = true
+
         startButton.isHidden = true
         pickedButton.isHidden = false
         mapView.removeOverlays(mapView.overlays)
@@ -191,6 +193,8 @@ class HomeController: UIViewController {
     }
     
     private func stopRide() {
+        _isStarted = false
+        
         startButton.isHidden = false
         stopButton.isHidden = true
         pauseButton.isHidden = true
@@ -224,8 +228,8 @@ class HomeController: UIViewController {
             "bookingId" : "\(getAutoIncremenet(currentObjectId as! NSManagedObjectID))",
             "status" : "started",
             "time" : "\(booking?.time as Any)",
-            "lat" : "",
-            "lng" : ""
+            "lat" : locationList.last?.coordinate.latitude as Any,
+            "lng" : locationList.last?.coordinate.longitude as Any
         ]
         
         sendBookingData(parameters)
@@ -249,8 +253,8 @@ class HomeController: UIViewController {
             "bookingId" : "\(getAutoIncremenet(currentObjectId as! NSManagedObjectID))",
             "status" : "\(object.status as Any)",
             "time" : "\(object?.time as Any)",
-            "lat" : "",
-            "lng" : ""
+            "lat" : locationList.last?.coordinate.latitude as Any,
+            "lng" : locationList.last?.coordinate.longitude as Any
         ]
         
         sendBookingData(parameters)
@@ -335,8 +339,9 @@ extension HomeController: CLLocationManagerDelegate {
                 let region = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 500, 500)
                 mapView.setRegion(region, animated: true)
             }
-            print("NEW LOCATION: \(newLocation)")
-            sendGPSData(newLocation)
+            if _isStarted == true {
+                sendGPSData(newLocation)
+            }
             locationList.append(newLocation)
         }
     }
