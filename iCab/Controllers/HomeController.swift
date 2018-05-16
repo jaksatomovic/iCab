@@ -129,6 +129,9 @@ class HomeController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.navigationController?.title = "iCab"
+        
         setupViews()
         mapView.delegate = self
         mapView.showsUserLocation = true
