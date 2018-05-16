@@ -4,7 +4,7 @@
 </p>
 
 ![Swift 4.0.x](https://img.shields.io/badge/Swift-4.0-orange.svg)
-![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20tvOS%20%7C%20watchOS%20%7C%20Linux-333333.svg)
+![platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20-333333.svg)
 
 
 
