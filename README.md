@@ -1,4 +1,3 @@
-# iCab
 <p align="center">
   <img src="https://raw.githubusercontent.com/jaksatomovic/iCab/master/img.png" alt="iCab"/>
 </p>
