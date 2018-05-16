@@ -6,36 +6,35 @@
   Copyright © 2018 Jakša Tomović. All rights reserved.
 */
 
-"home" = "Početna";
-"history" = "Povjest";
-"settings" = "Postavke";
+"home" = "Home";
+"history" = "History";
+"settings" = "Settings";
 
-"user_info" = "Podaci korisnika";
-"user_photo" = "Profilna slika";
+"user_info" = "User Info";
+"user_photo" = "User Photo";
 
-"name" = "Ime";
-"age"  = "Dob";
-"registration" = "Registracijska oznaka";
-"change_avatar" = "Promjeni sliku";
-
-"years" = "godina";
-
-
-"distance" = "Udaljenost:";
-"time" =  "Vrijeme:";
-"pace" = "Tempo:";
+"name" = "Name";
+"age"  = "Age";
+"registration" = "Registration plate";
+"change_avatar" = "Change photo";
+"years" = "years";
 
 
+"distance" = "Distance:";
+"time" =  "Time:";
+"pace" = "Pace:";
 
-"from" = "Polazište:";
-"to" = "Odredište:";
 
-"start" = "Pokreni vožnju";
-"stop" = "Zaustavi vožnju";
-"continue" = "Nastavi vožnju";
-"pick" = "Putnik ukrcan";
 
-"alert.title" = "Zaustaviti vožnju?";
-"alert.message" = "Želite li zaustaviti Vašu vožnju?";
-"alert.yes" = "Da";
-"alert.no" = "Odustani";
+"from" = "From:";
+"to" = "To:";
+
+"start" = "Start ride";
+"stop" = "End ride";
+"continue" = "Continue ride";
+"pick" = "Picked Up";
+
+"alert.title" = "End ride?";
+"alert.message" = "Do You wish to end ride?";
+"alert.yes" = "Yes";
+"alert.no" = "Cancel";

@@ -229,7 +229,6 @@ extension SettingsController {
             userDefaults.set(textField.text, forKey: Constants.General.registration.key())
         }
         userDefaults.synchronize()
-        updateUI() //---> remove later this line
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
