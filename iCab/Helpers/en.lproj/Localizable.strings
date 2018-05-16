@@ -1,0 +1,41 @@
+/* 
+  Localizable.strings
+  iCab
+
+  Created by Jaksa Tomovic on 16/05/2018.
+  Copyright © 2018 Jakša Tomović. All rights reserved.
+*/
+
+"home" = "Početna";
+"history" = "Povjest";
+"settings" = "Postavke";
+
+"user_info" = "Podaci korisnika";
+"user_photo" = "Profilna slika";
+
+"name" = "Ime";
+"age"  = "Dob";
+"registration" = "Registracijska oznaka";
+"change_avatar" = "Promjeni sliku";
+
+"years" = "godina";
+
+
+"distance" = "Udaljenost:";
+"time" =  "Vrijeme:";
+"pace" = "Tempo:";
+
+
+
+"from" = "Polazište:";
+"to" = "Odredište:";
+
+"start" = "Pokreni vožnju";
+"stop" = "Zaustavi vožnju";
+"continue" = "Nastavi vožnju";
+"pick" = "Putnik ukrcan";
+
+"alert.title" = "Zaustaviti vožnju?";
+"alert.message" = "Želite li zaustaviti Vašu vožnju?";
+"alert.yes" = "Da";
+"alert.no" = "Odustani";

@@ -37,7 +37,7 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.placeholder = "From:"
+        tf.placeholder = NSLocalizedString("from", comment: "")
         tf.textAlignment = .left
         tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
@@ -50,7 +50,7 @@ class HomeController: UIViewController {
         tf.layer.cornerRadius = 10
         tf.textAlignment = .left
         tf.textColor = .black
-        tf.placeholder = "To:"
+        tf.placeholder = NSLocalizedString("to", comment: "")
         tf.textAlignment = .left
         tf.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         return tf
@@ -73,7 +73,7 @@ class HomeController: UIViewController {
         let btn = UIButton()
         btn.backgroundColor = .green
         btn.setTitleColor(UIColor.white, for: .normal)
-        btn.setTitle("Start ride", for: .normal)
+        btn.setTitle(NSLocalizedString("start", comment: ""), for: .normal)
         btn.addTarget(self, action: #selector(startTapped), for: .touchUpInside)
         return btn
     }()
@@ -82,7 +82,7 @@ class HomeController: UIViewController {
         let btn = UIButton()
         btn.backgroundColor = .black
         btn.setTitleColor(UIColor.white, for: .normal)
-        btn.setTitle("Passenger picked up", for: .normal)
+        btn.setTitle(NSLocalizedString("pick", comment: ""), for: .normal)
         btn.addTarget(self, action: #selector(pickedUpTapped), for: .touchUpInside)
         return btn
     }()
@@ -91,7 +91,7 @@ class HomeController: UIViewController {
         let btn = UIButton()
         btn.backgroundColor = .black
         btn.setTitleColor(UIColor.white, for: .normal)
-        btn.setTitle("Continue ride", for: .normal)
+        btn.setTitle(NSLocalizedString("continue", comment: ""), for: .normal)
         btn.addTarget(self, action: #selector(continueTapped), for: .touchUpInside)
         return btn
     }()
@@ -109,7 +109,7 @@ class HomeController: UIViewController {
         let btn = UIButton()
         btn.backgroundColor = .red
         btn.setTitleColor(UIColor.white, for: .normal)
-        btn.setTitle("Stop ride", for: .normal)
+        btn.setTitle(NSLocalizedString("stop", comment: ""), for: .normal)
         btn.addTarget(self, action: #selector(stopTapped), for: .touchUpInside)
         return btn
     }()
@@ -187,7 +187,7 @@ class HomeController: UIViewController {
         locationManager.distanceFilter = 10
         locationManager.startUpdatingLocation()
         locationManager.startUpdatingHeading()
-        saveRide()
+        locationManager.allowsBackgroundLocationUpdates = true
     }
     
     private func startRide() {
@@ -340,11 +340,11 @@ extension HomeController {
     
     @objc func stopTapped() {
         
-        let alertController = UIAlertController(title: "End ride?",
-                                                message: "Do you wish to end your ride?",
+        let alertController = UIAlertController(title: NSLocalizedString("alert.title", comment: ""),
+                                                message: NSLocalizedString("alert.message", comment: ""),
                                                 preferredStyle: .actionSheet)
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        alertController.addAction(UIAlertAction(title: "Yes", style: .default) { _ in
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("alert.no", comment: ""), style: .cancel))
+        alertController.addAction(UIAlertAction(title: NSLocalizedString("alert.yes", comment: ""), style: .default) { _ in
             self.stopRide()
             self.changeStatus("finished")
             self.saveRide()

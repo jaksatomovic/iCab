@@ -80,10 +80,10 @@ class DetailController: UIViewController {
         let formattedTime = FormatDisplay.time(seconds)
         let formattedPace = FormatDisplay.pace(distance: distance, seconds: seconds, outputUnit: UnitSpeed.minutesPerKilometer)
     
-        distanceLabel.text = "Distance:  \(formattedDistance)"
+        distanceLabel.text = "\(NSLocalizedString("distance", comment: ""))  \(formattedDistance)"
         dateLabel.text = formattedDate
-        timeLabel.text = "Time:  \(formattedTime)"
-        paceLabel.text = "Pace:  \(formattedPace)"
+        timeLabel.text = "\(NSLocalizedString("time", comment: ""))  \(formattedTime)"
+        paceLabel.text = "\(NSLocalizedString("pace", comment: ""))  \(formattedPace)"
         
         
         loadMap()

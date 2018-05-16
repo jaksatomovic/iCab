@@ -87,9 +87,9 @@ class SettingsController: UIViewController, UINavigationControllerDelegate, UIIm
         numberFormatter.numberStyle = .decimal
         let suffix = " "
         
-        nameText.text = numberFormatter.string(for: userDefaults.double(forKey: Constants.General.name.key()))! + suffix
+        nameText.text = userDefaults.string(forKey: Constants.General.name.key())! + suffix
         ageLabel.text = numberFormatter.string(for: userDefaults.double(forKey: Constants.General.age.key()))! + suffix
-        registrationText.text = numberFormatter.string(for: userDefaults.double(forKey: Constants.General.registration.key()))! + suffix
+        registrationText.text = userDefaults.string(forKey: Constants.General.registration.key())! + suffix
 
         let data = userDefaults.object(forKey: Constants.General.avatar.key()) as! NSData
         avatarImageView.image = UIImage(data: data as Data)
@@ -145,9 +145,9 @@ extension SettingsController: UITableViewDelegate, UITableViewDataSource {
     }
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if section == 0 {
-            return "User info"
+            return NSLocalizedString("user_info", comment: "")
         } else if section == 1 {
-            return "User Photo"
+            return NSLocalizedString("user_photo", comment: "")
         } else {
             return "App Developer"
         }
@@ -167,27 +167,26 @@ extension SettingsController: UITableViewDelegate, UITableViewDataSource {
                 let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
                 cell.addSubview(nameText)
                 nameText.anchor(cell.topAnchor, left: nil, bottom: cell.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 12, widthConstant: 100, heightConstant: 0)
-//                cell.textLabel?.text = NSLocalizedString("gulp.small", comment: "")
-                cell.textLabel?.text = "Name:"
+                cell.textLabel?.text = NSLocalizedString("name", comment: "")
                 return cell
             } else if indexPath.row == 1 {
                 let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
                 cell.addSubview(ageLabel)
                 ageLabel.anchor(cell.topAnchor, left: nil, bottom: cell.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 12, widthConstant: 100, heightConstant: 0)
-                cell.textLabel?.text = "Age: "
+                cell.textLabel?.text = NSLocalizedString("age", comment: "")
                 return cell
             } else {
                 let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
                 cell.addSubview(registrationText)
                 registrationText.anchor(cell.topAnchor, left: nil, bottom: cell.bottomAnchor, right: view.rightAnchor, topConstant: 0, leftConstant: 0, bottomConstant: 0, rightConstant: 12, widthConstant: 100, heightConstant: 0)
-                cell.textLabel?.text = "Registration plate:"
+                cell.textLabel?.text = NSLocalizedString("registration", comment: "")
                 return cell
             }
         } else if indexPath.section == 1 {
             let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
             cell.addSubview(avatarImageView)
             avatarImageView.anchor(cell.topAnchor, left: nil, bottom: nil, right: view.rightAnchor, topConstant: 5, leftConstant: 0, bottomConstant: 0, rightConstant: 12, widthConstant: 50, heightConstant: 50)
-            cell.textLabel?.text = "Change avatar:"
+            cell.textLabel?.text = NSLocalizedString("change_avatar", comment: "")
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: cellID, for: indexPath)
@@ -202,9 +201,9 @@ extension SettingsController {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         var actionSheet: AHKActionSheet?
         if ((indexPath as NSIndexPath).section == 0 && (indexPath as NSIndexPath).row == 1) {
-            actionSheet = AHKActionSheet(title: "Age") //NSLocalizedString("from:", comment: "")
-            for index in 18...60 {
-                actionSheet?.addButton(withTitle: "\(index) years", type: .default) { _ in
+            actionSheet = AHKActionSheet(title: NSLocalizedString("age", comment: "")) 
+            for index in 15...60 {
+                actionSheet?.addButton(withTitle: "\(index) \(NSLocalizedString("years", comment: ""))", type: .default) { _ in
                     self.updateSetting(Constants.General.age.key(), value: index)
                 }
             }
@@ -224,20 +223,13 @@ extension SettingsController {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         if (textField == nameText) {
-            storeText(nameText, toKey: Constants.General.name.key())
+            userDefaults.set(textField.text , forKey: Constants.General.name.key())
         }
         if (textField == registrationText) {
-            storeText(registrationText, toKey: Constants.General.registration.key())
+            userDefaults.set(textField.text, forKey: Constants.General.registration.key())
         }
-    }
-    
-    func storeText(_ textField: UITextField, toKey key: String) {
-        guard let text = textField.text else {
-            return
-        }
-        let number = numberFormatter.number(from: text) as? Double
-        userDefaults.set(number ?? 0.0, forKey: key)
         userDefaults.synchronize()
+        updateUI() //---> remove later this line
     }
     
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {

@@ -20,19 +20,19 @@ class MainController: UITabBarController {
         
         let mapController = HomeController()
         mapController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "mappointer").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "mappointer").withRenderingMode(.alwaysOriginal))
-        mapController.tabBarItem.title = "Home"
+        mapController.tabBarItem.title =  NSLocalizedString("home", comment: "")
         
         
         let historyController = PreviousController()
         let navHistoryController = SwipeNavigationController(rootViewController: historyController)
         navHistoryController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "refresh-ccw").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "refresh-ccw").withRenderingMode(.alwaysOriginal))
-        navHistoryController.tabBarItem.title = "History"
+        navHistoryController.tabBarItem.title = NSLocalizedString("history", comment: "")
         
         
         let settingsController = SettingsController()
         let navSettingsController = SwipeNavigationController(rootViewController: settingsController)
         navSettingsController.tabBarItem = UITabBarItem(title: nil, image: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal), selectedImage: #imageLiteral(resourceName: "user").withRenderingMode(.alwaysOriginal))
-        navSettingsController.tabBarItem.title = "Settings"
+        navSettingsController.tabBarItem.title = NSLocalizedString("settings", comment: "")
         
         
         viewControllers = [mapController, navHistoryController, navSettingsController]
